@@ -9,29 +9,37 @@
 
 
 
-int main() {
+int main(int argc,char *argv[]) {
 
-    printf("Performing DNS lookup....\n");
+    if(argc!=2) {
+        printf("Usage: <hosname>\n");
+        return -1;
+    }
+
+    printf("Performing DNS lookup for %s\n",argv[1]);
 
     //DNS lookup logic
 
     char ipstr[INET6_ADDRSTRLEN];
     struct addrinfo *result;
-    const char *node = "google.com";
-    const char *service = "http";
+    const char *node = argv[1];
+    const char *service = NULL;
    struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
-    hints.ai_socktype = 0; /* Datagram socket */
-    hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = 0;    /* For wildcard IP address */
     hints.ai_protocol = 0;          /* Any protocol */
     hints.ai_canonname = NULL;
     hints.ai_addr = NULL;
     hints.ai_next = NULL;
 
     int res = getaddrinfo(node,service,&hints,&result);
-    // ignoring the value of res for now
-    (void)res;
+
+    if (res != 0) {
+        fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(res));
+        return -1;
+    }
 
     // printing the results of DNS lookup
     struct addrinfo *rp;
