@@ -15,6 +15,7 @@ int main() {
 
     //DNS lookup logic
 
+    char ipstr[INET6_ADDRSTRLEN];
     struct addrinfo *result;
     const char *node = "google.com";
     const char *service = "http";
@@ -35,13 +36,25 @@ int main() {
     // printing the results of DNS lookup
     struct addrinfo *rp;
     for(rp = result; rp!=NULL; rp = rp->ai_next){
-        printf("\tFamily : %s\n",rp->ai_family == AF_INET ? "IPv4" : "IPv6");
+        void *addr;
+        char *ipver;
+        struct sockaddr_in *ipv4;
+        struct sockaddr_in6 *ipv6;
 
-        //convert IP address to human readable strings
-        char ipstr[INET6_ADDRSTRLEN];
-        const char *ip_addr = inet_ntop(rp->ai_family,rp->ai_addr,ipstr,sizeof(ipstr));
+        if(rp->ai_family == AF_INET) {
+            ipv4 = (struct sockaddr_in *)rp->ai_addr;
+            addr = &(ipv4->sin_addr);
+            ipver = "IPv4";
+        }
+        else {
+            ipv6 = (struct sockaddr_in6 *)rp->ai_addr;
+            addr = &(ipv6->sin6_addr);
+            ipver = "IPv6";
+        }
+        //converting IP addresses to string and printing it
+        inet_ntop(rp->ai_family,addr,ipstr,sizeof(ipstr));
 
-        printf("\tSocket Address :%s",ip_addr);
+        printf("%s: %s\n",ipver,ipstr);
     }
 
     freeaddrinfo(result);
