@@ -1,9 +1,12 @@
 #include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <arpa/inet.h>
+
 
 
 int main() {
@@ -32,7 +35,13 @@ int main() {
     // printing the results of DNS lookup
     struct addrinfo *rp;
     for(rp = result; rp!=NULL; rp = rp->ai_next){
-        printf("Family : %s\n",rp->ai_family == AF_INET ? "IPv4" : "IPv6");
+        printf("\tFamily : %s\n",rp->ai_family == AF_INET ? "IPv4" : "IPv6");
+
+        //convert IP address to human readable strings
+        char ipstr[INET6_ADDRSTRLEN];
+        const char *ip_addr = inet_ntop(rp->ai_family,rp->ai_addr,ipstr,sizeof(ipstr));
+
+        printf("\tSocket Address :%s",ip_addr);
     }
 
     freeaddrinfo(result);
